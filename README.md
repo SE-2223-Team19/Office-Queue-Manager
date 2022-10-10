@@ -1,1 +1,1 @@
-This is the project demo softEng of team19
+This project is based on React JS
