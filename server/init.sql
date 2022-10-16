@@ -32,7 +32,7 @@ CREATE TABLE tickets (
 
 CREATE TABLE served_tickets (
     ticket INTEGER NOT NULL PRIMARY KEY,
-    date_of_serving TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_of_serving DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ticket) REFERENCES tickets(id)
 );
 
