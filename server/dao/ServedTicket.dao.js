@@ -27,7 +27,7 @@ exports.existServedTicket = function existServedTicket(db, ticket) {
 exports.queryServedTicket = function queryServedTicket(db, where, params, order_by) {
     return all(db, `SELECT * FROM ${table_name}${where ? ` WHERE ${where}` : ""}${order_by ? ` ORDER BY ${order_by}` : ""};`, params)
             .then(rows => 
-                rows.map(row => ({"id": row.id, "name": row.name}))
+                rows.map(row => ({"ticket": row.ticket, "date_of_serving": new Date(row.date_of_serving)}))
             );
 };
 

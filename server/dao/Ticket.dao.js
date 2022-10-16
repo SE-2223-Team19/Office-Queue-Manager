@@ -27,7 +27,7 @@ exports.existTicket = function existTicket(db, id) {
 exports.queryTicket = function queryTicket(db, where, params, order_by) {
     return all(db, `SELECT * FROM ${table_name}${where ? ` WHERE ${where}` : ""}${order_by ? ` ORDER BY ${order_by}` : ""};`, params)
             .then(rows => 
-                rows.map(row => ({"id": row.id, "name": row.name}))
+                rows.map(row => ({"id": row.id, "date_of_issue": new Date(row.date_of_issue), "service_type": row.service_type}))
             );
 };
 
