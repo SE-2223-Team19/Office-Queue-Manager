@@ -1,0 +1,85 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "start servers",
+			"dependsOn": [
+				"npm: start - server",
+				"npm: start - client"
+			]
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"path": "server",
+			"problemMatcher": [
+				{
+					"pattern": [
+					  {
+						"regexp": "",
+						"file": 1,
+						"location": 2,
+						"message": 3
+					  }
+					],
+					"background": {
+					  "activeOnStart": true,
+					  "beginsPattern": ".",
+					  "endsPattern": "."
+					}
+				}
+			],
+			"label": "npm: start - server",
+			"detail": "npm start",
+			"options": {
+				"cwd": "${workspaceFolder}/server"
+			},
+			"isBackground": true
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": [
+				{
+					"pattern": [
+					{
+						"regexp": "",
+						"file": 1,
+						"location": 2,
+						"message": 3
+					}
+					],
+					"background": {
+					"activeOnStart": true,
+					"beginsPattern": ".",
+					"endsPattern": "."
+					}
+				}
+			],
+			"label": "npm: start - client",
+			"detail": "react-scripts start",
+			"path": "client",
+			"options": {
+				"env": {
+					"BROWSER": "none"
+				},
+				"cwd": "${workspaceFolder}/client"
+			},
+			"isBackground": true
+		},
+		{
+			"label": "Terminate All Tasks",
+			"command": "echo ${input:terminate}",
+			"type": "shell",
+			"problemMatcher": []
+		}
+	],
+	"inputs": [
+		{
+		"id": "terminate",
+		"type": "command",
+		"command": "workbench.action.tasks.terminate",
+		"args": "terminateAll"
+		}
+	]
+}
