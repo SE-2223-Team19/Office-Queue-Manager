@@ -62,3 +62,16 @@ exports.getUserInfo = async function getUserInfo() {
         throw user;
     }
 }
+//Added by Shahab
+exports.NextCallCustomer = async function NextCallCustomer() {
+    const url = APIURL + '/NextCall';
+    const response = await fetch(url);
+    if (response.ok) {
+        const user = await response.json();
+        return user;
+    }
+    else {
+        const err = await response.text();
+        throw err;
+    }
+}

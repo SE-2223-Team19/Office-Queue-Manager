@@ -7,6 +7,7 @@ import ServicePage from '../src/components/ServiceTypesPage'
 import { useEffect, useState } from 'react';
 import LoginRoute from '../src/components/LoginRoute';
 
+
 function App() {
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(false);
