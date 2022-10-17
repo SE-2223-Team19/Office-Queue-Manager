@@ -29,13 +29,17 @@ async function ServiceType_test() {
     const db = await connect(database);
     
     assert(!await existServiceType(db, "Test service"), "Test service already exists");
+
+    const service_time = (new Date("2022-01-01 18:00:00")) - (new Date("2022-01-01 17:50:00"));
+
     await insertServiceType(db, {
         "name": "Test service",
-        "abbreviation_letter": "T"
+        "abbreviation_letter": "T",
+        "service_time": service_time
     });
     assert(await existServiceType(db, "Test service"), "Test service was not inserted");
     const services = await queryServiceType(db, "name = ?", ["Test service"]);
-    assert(services.length == 1 && services[0].abbreviation_letter == "T" && services[0].name == "Test service", "Test service was not selected");
+    assert(services.length == 1 && services[0].abbreviation_letter == "T" && services[0].name == "Test service" && services[0].service_time == service_time, "Test service was not selected");
     await deleteServiceType(db, "Test service");
     assert(!await existServiceType(db, "Test service"), "Counter 1 was not deleted");
 }
@@ -52,7 +56,8 @@ async function ServiceTypeCounter_test() {
     assert(!await existServiceType(db, "Test service"), "Test service already exists");
     await insertServiceType(db, {
         "name": "Test service",
-        "abbreviation_letter": "T"
+        "abbreviation_letter": "T",
+        "service_time": (new Date("2022-01-01 18:00:00")) - (new Date("2022-01-01 17:50:00"))
     });
     assert(await existServiceType(db, "Test service"), "Test service was not inserted");
 
@@ -79,7 +84,8 @@ async function Ticket_test() {
     assert(!await existServiceType(db, "Test service"), "Test service already exists");
     await insertServiceType(db, {
         "name": "Test service",
-        "abbreviation_letter": "T"
+        "abbreviation_letter": "T",
+        "service_time": (new Date("2022-01-01 18:00:00")) - (new Date("2022-01-01 17:50:00"))
     });
     assert(await existServiceType(db, "Test service"), "Test service was not inserted");
 
@@ -111,7 +117,8 @@ async function ServedTicket_test() {
     assert(!await existServiceType(db, "Test service"), "Test service already exists");
     await insertServiceType(db, {
         "name": "Test service",
-        "abbreviation_letter": "T"
+        "abbreviation_letter": "T",
+        "service_time": (new Date("2022-01-01 18:00:00")) - (new Date("2022-01-01 17:50:00"))
     });
     assert(await existServiceType(db, "Test service"), "Test service was not inserted");
     const insert_result = await insertTicket(db, {

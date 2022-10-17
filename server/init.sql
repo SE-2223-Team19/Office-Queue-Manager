@@ -7,7 +7,8 @@ DROP TABLE IF EXISTS service_types;
 
 CREATE TABLE service_types (
     name TEXT NOT NULL PRIMARY KEY,
-    abbreviation_letter TEXT NOT NULL UNIQUE
+    abbreviation_letter TEXT NOT NULL UNIQUE,
+    service_time TIMESPAN NOT NULL
 );
 
 CREATE TABLE counters (

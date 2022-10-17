@@ -22,23 +22,23 @@ const table_name = "service_types";
  * @param {string} where 
  * @param {any[]} params 
  * @param {string} order_by
- * @returns {Promise<{name: string; abbreviation_letter: string;}[]>}
+ * @returns {Promise<{name: string; abbreviation_letter: string; service_time: Number}[]>}
  */
 exports.queryServiceType = function queryServiceType(db, where, params, order_by) {
     return all(db, `SELECT * FROM ${table_name}${where ? ` WHERE ${where}` : ""}${order_by ? ` ORDER BY ${order_by}` : ""};`, params)
             .then(rows => 
-                rows.map(row => ({"name": row.name, "abbreviation_letter": row.abbreviation_letter}))
+                rows.map(row => ({"name": row.name, "abbreviation_letter": row.abbreviation_letter, "service_time": row.service_time}))
             );
 };
 
 /**
  * Inserts a new ServiceType
  * @param {sqlite.Database} db 
- * @param {{name: string; abbreviation_letter: string;}} service_type 
+ * @param {{name: string; abbreviation_letter: string; service_time: Number}} service_type 
  * @returns {Promise<sqlite.RunResult>}
  */
 exports.insertServiceType = function insertServiceType(db, service_type) {
-    return run(db, `INSERT INTO ${table_name} (name, abbreviation_letter) VALUES (?, ?);`, [service_type.name, service_type.abbreviation_letter]);
+    return run(db, `INSERT INTO ${table_name} (name, abbreviation_letter, service_time) VALUES (?, ?, ?);`, [service_type.name, service_type.abbreviation_letter, service_type.service_time]);
 };
 
 /**
