@@ -32,6 +32,15 @@ exports.queryTicket = function queryTicket(db, where, params, order_by) {
 };
 
 /**
+ * Selects the Tickets to be served for the specified service types
+ * @param {sqlite.Database} db 
+ * @param {string[]} selected_services 
+ */
+exports.queryQueues = function queryQueues(db, selected_services) {
+    return queryTicket(db, `service_type IN (${new Array(selected_services.length).fill("?").join(", ")}) AND id NOT IN (SELECT ticket FROM served_tickets)`, [...selected_services]);
+};
+
+/**
  * Inserts a new Ticket
  * @param {sqlite.Database} db 
  * @param {{date_of_issue: Date; service_type: string;}} ticket 
