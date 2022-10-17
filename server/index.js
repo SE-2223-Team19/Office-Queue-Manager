@@ -35,6 +35,11 @@ let db_connection = require('../server/dao/sqlite.promise');
 const serviceTypes = require('../server/dao/ServiceType.dao');
 const user = require('../server/dao/User.dao');
 
+// Routes
+const serviceTypesRoutes = require('./routes/service-types-routes');
+
+app.use("/service-types", serviceTypesRoutes);
+
 // Classes import
 let servicesTypesClass = require('../server/classes/service_types');
 

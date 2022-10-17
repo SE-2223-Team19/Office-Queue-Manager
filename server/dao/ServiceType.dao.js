@@ -1,7 +1,9 @@
 "use strict";
+const { getConnection } = require("../config");
 const { all, run } = require("./sqlite.promise");
 
 const table_name = "service_types";
+const db = await getConnection();
 
 /**
  * Check if a ServiceType exists
@@ -24,10 +26,14 @@ const table_name = "service_types";
  * @param {string} order_by
  * @returns {Promise<{name: string; abbreviation_letter: string; service_time: Number}[]>}
  */
-exports.queryServiceType = function queryServiceType(db, where, params, order_by) {
+exports.queryServiceType = function queryServiceType(where, params, order_by) {
     return all(db, `SELECT * FROM ${table_name}${where ? ` WHERE ${where}` : ""}${order_by ? ` ORDER BY ${order_by}` : ""};`, params)
             .then(rows => 
                 rows.map(row => ({"name": row.name, "abbreviation_letter": row.abbreviation_letter, "service_time": row.service_time}))
+            ).catch(err => {
+                console.log(err);
+                return [];
+            }
             );
 };
 
