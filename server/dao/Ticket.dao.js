@@ -35,6 +35,7 @@ exports.queryTicket = function queryTicket(db, where, params, order_by) {
  * Selects the Tickets to be served for the specified service types
  * @param {sqlite.Database} db 
  * @param {string[]} selected_services 
+ * @returns {Promise<{id: Number; date_of_issue: Date; service_type: string;}[]>}
  */
 exports.queryQueues = function queryQueues(db, selected_services) {
     return queryTicket(db, `service_type IN (${new Array(selected_services.length).fill("?").join(", ")}) AND id NOT IN (SELECT ticket FROM served_tickets)`, [...selected_services]);
