@@ -38,12 +38,12 @@ async function run(db, sql, params) {
 }
 
 /**
- * 
+ * Defines the methods of interaction with an entity in a database
  * @class
  * @template T
- * @param {Database} database
- * @param {string} table 
- * @param {{name: string; allow_insert: boolean; is_key: boolean; map: (any) => any}[]} columns 
+ * @param {Database} database The database instance
+ * @param {string} table The table name
+ * @param {{name: string; allow_insert: boolean; is_key: boolean; map: (any) => any}[]} columns The list of columns
  * @returns {Entity<T>}
  */
 function Entity(database, table, columns) {
@@ -62,10 +62,10 @@ function Entity(database, table, columns) {
     this.columns = columns = columns.map(c => ({...column_defaults, ...c}));
 
     /**
-     * 
-     * @param {string} where 
-     * @param {any[]} params 
-     * @param {string} order_by 
+     * Gets the list of entities with filters and orders
+     * @param {string} where The where part of a select statement
+     * @param {any[]} params The parameters to sobstitute in the where part
+     * @param {string} order_by The order by part of a select statement
      * @returns {Promise<T[]>}
      */
     this.get = async (where, params, order_by) => {
@@ -80,30 +80,60 @@ function Entity(database, table, columns) {
     };
 
     /**
-     * 
-     * @param {T} entity 
-     * @returns {Promise<sqlite.RunResult>}
+     * Adds a new entity to the table and returns it
+     * @param {T} entity The entity to add
+     * @returns {Promise<T>}
      */
     this.add = async (entity) => {
-        return run(await database.getConnection(), `INSERT INTO ${table} (${columns.filter(c => c.allow_insert).map(c => `"${c.name}"`).join(', ')}) VALUES (${columns.filter(c => c.allow_insert).map(_ => '?').join(', ')})`, columns.filter(c => c.allow_insert).map(c => entity[c.name]));
+        return run(await database.getConnection(), `INSERT INTO ${table} (${columns.filter(c => c.allow_insert).map(c => `"${c.name}"`).join(', ')}) VALUES (${columns.filter(c => c.allow_insert).map(_ => '?').join(', ')})`, columns.filter(c => c.allow_insert).map(c => entity[c.name]))
+        .then(r => {
+            if (r.changes > 0) {
+                return this.get(columns.filter(c => c.is_key).map(c => `"${c.name}" = ?`).join(' AND '), columns.filter(c => c.is_key).map(c => entity[c.name]))
+                .then(r => r.length == 1 ? r[0] : null);
+            }
+            return null;
+        });
     };
 
     /**
-     * 
-     * @param {T} entity 
-     * @returns {Promise<sqlite.RunResult>}
+     * Removes an entity from the table and returns it
+     * @param {T} entity The entity to remove
+     * @returns {Promise<T>}
      */
     this.remove = async (entity) => {
-        return run(await database.getConnection(), `DELETE FROM ${table} WHERE ${columns.filter(c => c.is_key).map(c => `"${c.name}" = ?`).join(' AND ')}`, columns.filter(c => c.is_key).map(c => entity[c.name]));
+        if (columns.filter(c => c.is_key).all(c => entity[c.name] !== undefined && entity[c.name] !== null)) {
+            return this.get(columns.filter(c => c.is_key).map(c => `"${c.name}" = ?`).join(' AND '), columns.filter(c => c.is_key).map(c => entity[c.name]))
+            .then(r => {
+                if (r.length == 1) {
+                    return database.getConnection().then(db => run(db, `DELETE FROM ${table} WHERE ${columns.filter(c => c.is_key).map(c => `"${c.name}" = ?`).join(' AND ')}`, columns.filter(c => c.is_key).map(c => entity[c.name])))
+                    .then(_ => r[0]);
+                }
+                return null;
+            });
+        }
+        throw new Error(`Can't remove entity ${entity} from table ${table} because is missing some key properties`);
     };
 
     /**
-     * 
-     * @param {T} entity 
-     * @returns {Promise<sqlite.RunResult>}
+     * Updates an entity in the table and returns the updated version
+     * @param {T} entity The entity to update
+     * @returns {Promise<T>}
      */
     this.update = async (entity) => {
-        return run(await database.getConnection(), `UPDATE ${table} SET ${columns.filter(c => !c.is_key && entity[c.name] !== undefined).map(c => `"${c.name}" = ?`).join(', ')} WHERE ${columns.filter(c => c.is_key).map(c => `"${c.name}" = ?`).join(' AND ')}`, [ ...columns.filter(c => !c.is_key && entity[c.name] !== undefined).map(c => entity[c.name]), ...columns.filter(c => c.is_key).map(c => entity[c.name])]);
+        if (columns.filter(c => c.is_key).all(c => entity[c.name] !== undefined && entity[c.name] !== null)) {
+            if (columns.filter(c => !c.is_key && entity[c.name] !== undefined).length > 0) {
+                return run(await database.getConnection(), `UPDATE ${table} SET ${columns.filter(c => !c.is_key && entity[c.name] !== undefined).map(c => `"${c.name}" = ?`).join(', ')} WHERE ${columns.filter(c => c.is_key).map(c => `"${c.name}" = ?`).join(' AND ')}`, [ ...columns.filter(c => !c.is_key && entity[c.name] !== undefined).map(c => entity[c.name]), ...columns.filter(c => c.is_key).map(c => entity[c.name])])
+                .then(r => {
+                    if (r.changes > 0) {
+                        return this.get(columns.filter(c => c.is_key).map(c => `"${c.name}" = ?`).join(' AND '), columns.filter(c => c.is_key).map(c => entity[c.name]))
+                        .then(r => r.length == 1 ? r[0] : null);
+                    }
+                    return null;
+                });
+            }
+            throw new Error(`Can't update entity ${entity} from table ${table} because no property to update is present`);
+        }
+        throw new Error(`Can't update entity ${entity} from table ${table} because is missing some key properties`);
     };
 }
 

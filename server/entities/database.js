@@ -3,7 +3,7 @@
 const sqlite = require("sqlite3");
 const Entity = require("./entity");
 
-const DATABASE_PATH = "database2.db";
+const DATABASE_PATH = "database.db";
 const DATABASE_INIT = "init.sql";
 
 /**
@@ -36,10 +36,12 @@ function Database() {
 
     this.getConnection = async () => {
         if (db === null) {
-            const {access, readFile, constants} = require("fs/promises");
+            const {access, readFile} = require("fs/promises");
+            const {constants} = require("fs");
             try {
                 await access(DATABASE_PATH, constants.R_OK | constants.W_OK);
-            } catch {
+                db = await connect(DATABASE_PATH);
+            } catch (e) {
                 const init = (await readFile(DATABASE_INIT)).toString();
                 db = await connect(DATABASE_PATH);
                 await new Promise((resolve, reject) => {
@@ -133,6 +135,30 @@ function Database() {
         {
             name: "date_of_serving",
             map: d => new Date(d)
+        }
+    ]);
+
+    /**
+     * @typedef {{id: Number; username: string; name: string; hash: string; salt: string;}} User
+     * @type {Entity<User>}
+     */
+    this.users = new Entity(this, "users", [
+        {
+            name: "id",
+            allow_insert: false,
+            is_key: true
+        },
+        {
+            name: "username"
+        },
+        {
+            name: "name"
+        },
+        {
+            name: "hash"
+        },
+        {
+            name: "salt"
         }
     ]);
 }
