@@ -2,16 +2,13 @@
 
 const Database = require("./database").default;
 
-async function t() {
-	const db = new Database();
-
-	const data = await db.service_types.get();
-
-	const res = await db.service_types.update({ abbreviation_letter: "T", name: "Test" });
-
-	const data2 = await db.service_types.get();
-
-	console.log(data);
-}
-
-t();
+describe('Counters test', () => { 
+    const database = new Database();
+    test('Should insert', async () => {
+        const c = {
+            id: 1,
+            name: "Counter 1"
+        }
+        expect(await database.counters.add(c)).toEqual(c);
+    });
+});

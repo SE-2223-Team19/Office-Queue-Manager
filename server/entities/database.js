@@ -33,27 +33,29 @@ function Database() {
 	 */
 	let db = null;
 
-	this.getConnection = async () => {
-		if (db === null) {
-			try {
-				await access(DATABASE_PATH, constants.R_OK | constants.W_OK);
-			} catch {
-				console.error("Database file does not exist or is not readable");
-			}
-			const init = (await readFile(DATABASE_INIT)).toString();
-			db = await connect(DATABASE_PATH);
-			await new Promise((resolve, reject) => {
-				db.exec(init, function (err) {
-					if (err) {
-						reject(err);
-						return;
-					}
-					resolve();
-				});
-			});
-		}
-		return db;
-	};
+    this.getConnection = async () => {
+        if (db === null) {
+            const {access, readFile} = require("fs/promises");
+            const {constants} = require("fs");
+            try {
+                await access(DATABASE_PATH, constants.R_OK | constants.W_OK);
+                db = await connect(DATABASE_PATH);
+            } catch (e) {
+                const init = (await readFile(DATABASE_INIT)).toString();
+                db = await connect(DATABASE_PATH);
+                await new Promise((resolve, reject) => {
+                    db.exec(init, function(err) {
+                        if (err) {
+                            reject(err);
+                            return;
+                        }
+                        resolve();
+                    })
+                });
+            }
+        }
+        return db;
+    };
 
 	/**
 	 * @typedef {{name: string; abbreviation_letter: string; service_time: number;}} ServiceType
@@ -120,20 +122,44 @@ function Database() {
 		},
 	]);
 
-	/**
-	 * @typedef {{id: number; date_of_serving: Date}} ServedTicket
-	 * @type {Entity<ServedTicket>}
-	 */
-	this.served_tickets = new Entity(this, "served_tickets", [
-		{
-			name: "id",
-			is_key: true,
-		},
-		{
-			name: "date_of_serving",
-			map: (d) => new Date(d),
-		},
-	]);
+    /**
+     * @typedef {{id: number; date_of_serving: Date}} ServedTicket
+     * @type {Entity<ServedTicket>}
+     */
+    this.served_tickets = new Entity(this, "served_tickets", [
+        {
+            name: "id",
+            is_key: true
+        },
+        {
+            name: "date_of_serving",
+            map: d => new Date(d)
+        }
+    ]);
+
+    /**
+     * @typedef {{id: Number; username: string; name: string; hash: string; salt: string;}} User
+     * @type {Entity<User>}
+     */
+    this.users = new Entity(this, "users", [
+        {
+            name: "id",
+            allow_insert: false,
+            is_key: true
+        },
+        {
+            name: "username"
+        },
+        {
+            name: "name"
+        },
+        {
+            name: "hash"
+        },
+        {
+            name: "salt"
+        }
+    ]);
 }
 
 module.exports = Database;
