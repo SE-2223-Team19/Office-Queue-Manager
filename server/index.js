@@ -7,6 +7,8 @@ const PORT = 3001;
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const Database = require("./entities/database");
+const crypto = require("crypto");
 // Passport-related imports
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -53,10 +55,28 @@ app.get("/api/callcustomer/:customerid/:serviceType", async (req, res) => {
 // Passport: set up local strategy
 passport.use(
 	new LocalStrategy(async function verify(username, password, cb) {
-		const user = await user.loginUser(username, password);
-		if (!user) return cb(null, false, "Incorrect username or password.");
+		const database = new Database();
+		const users = await database.users.get("username = ?", [username]);
+		if (users.length !== 1) {
+			return cb(null, false, "Incorrect username or password.");
+		}
 
-		return cb(null, user);
+		const user = users[0];
+
+		crypto.scrypt(password, user.salt, 32, (err, hashedPassword) => {
+			try {
+				if (err) {
+					throw new Error(err);
+				}
+				if (!crypto.timingSafeEqual(Buffer.from(user.hash, "hex"), hashedPassword)) {
+					return cb(null, false, "Incorrect username or password.");
+				} else {
+					return cb(null, user);
+				}
+			} catch (e) {
+				return cb(null, false, "Incorrect username or password.");
+			}
+		});
 	})
 );
 
