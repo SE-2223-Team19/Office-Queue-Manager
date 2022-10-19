@@ -1,11 +1,11 @@
-const APIURL = 'http://localhost:3001/';
+const APIURL = 'http://localhost:3001/api/';
 
 /**
  * Returns an Array that describes all services available
  * @returns Array
  */
 exports.loadServiceTypes = async function loadServiceTypes() {
-    const url = APIURL + 'ServicesTypes'
+    const url = APIURL + 'service-types';
     try {
         const response = await fetch(url)
         if (response.ok) {
@@ -20,7 +20,7 @@ exports.loadServiceTypes = async function loadServiceTypes() {
     }
 }
 exports.logIn = async function logIn(credentials) {
-    const url = APIURL + '/sessions';
+    const url = APIURL + 'sessions';
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -40,7 +40,7 @@ exports.logIn = async function logIn(credentials) {
 }
 
 exports.logOut = async function logOut() {
-    const url = APIURL + '/sessions/current'
+    const url = APIURL + 'sessions/current'
     const response = await fetch(url, {
         method: 'DELETE',
         credentials: 'include'
@@ -49,7 +49,7 @@ exports.logOut = async function logOut() {
         return null;
 }
 exports.getUserInfo = async function getUserInfo() {
-    const url = APIURL + '/sessions/current';
+    const url = APIURL + 'sessions/current';
     const response = await fetch(url, {
         credentials: 'include',
     });

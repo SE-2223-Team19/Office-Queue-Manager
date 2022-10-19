@@ -108,19 +108,19 @@ app.use(
 app.use(passport.authenticate("session"));
 
 /* If we aren't interested in sending error messages... */
-app.post("/sessions", passport.authenticate("local"), (req, res) => {
+app.post("/api/sessions", passport.authenticate("local"), (req, res) => {
 	res.status(201).json(req.user);
 });
 
 // GET /sessions/current
-app.get("/sessions/current", (req, res) => {
+app.get("/api/sessions/current", (req, res) => {
 	if (req.isAuthenticated()) {
 		res.json(req.user);
 	} else res.status(401).json({ error: "Not authenticated" });
 });
 
 // DELETE /sessions/current
-app.delete("/sessions/current", (req, res) => {
+app.delete("/api/sessions/current", (req, res) => {
 	req.logout(() => {
 		res.end();
 	});
