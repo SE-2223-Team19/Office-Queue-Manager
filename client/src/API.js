@@ -75,3 +75,22 @@ exports.NextCallCustomer = async function NextCallCustomer() {
         throw err;
     }
 }
+
+exports.insertTicket = async function insertTicket(service_types) {
+    const url = APIURL + 'tickets';
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({service_type: service_types}),
+    });
+    if (response.ok) {
+        const ticket = await response.json();
+        return ticket;
+    }
+    else {
+        const err = await response.text();
+        throw err;
+    }
+}

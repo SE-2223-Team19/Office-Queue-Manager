@@ -1,8 +1,9 @@
-import { Alert, Col, Row, Card } from "react-bootstrap";
+import { Alert, Col, Row, Card  } from "react-bootstrap";
 import LoginForm from "./AuthComponents";
 import React, { useEffect } from 'react';
 
 function LoginRoute(props) {
+
     useEffect(() => {
         document.body.style = 'background: #0089c9;';
     })

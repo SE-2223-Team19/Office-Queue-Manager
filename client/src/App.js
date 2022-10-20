@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import ServicePage from '../src/components/ServiceTypesPage'
 import { useEffect, useState } from 'react';
 import LoginRoute from '../src/components/LoginRoute';
+import { Container } from 'react-bootstrap'
 
 
 function App() {
@@ -32,23 +33,41 @@ function App() {
       setMessage({ msg: `Welcome, ${user.name} s${user.id}!`, type: 'success' });
     }
     catch (err) {
-      // console.log(err);
       setMessage({ msg: `Incorrect username or password`, type: 'danger' });
     }
   };
 
-  const handleLogout = async () => {
-    await API.logOut();
-    setLoggedIn(false);
-    setMessage({ msg: `Logout successful!`, type: 'success' });
-  };
+  // const handleLogout = async () => {
+  //   await API.logOut();
+  //   setLoggedIn(false);
+  //   setMessage({ msg: `Logout successful!`, type: 'success' });
+  // };
 
-  if (loading) { return <h1>Loading...</h1> }
+  const insertTicket = async (service_types) => {
+    try {
+      const insertedTicket = await API.insertTicket(service_types);
+      setMessage("Insert a prenotation for service " + service_types + " and you are number: " + insertedTicket.id);
+    } catch (error) {
+      setMessage({ msg: `Ticket entry failed!`, type: 'danger' })
+    }
+  }
+
+
+  if (loading) {
+    return <Container fluid className='p-4 rounded-3 bg-light' style={{ position: 'absolute', width: '95%', height: '70%', left: '2.5%' }}>
+      <Container fluid>
+        <div className="text-center">
+          <div className="spinner-border" role="status" style={{ width: '10rem', height: '10rem', position: 'relative', top: '100px' }}></div>
+        </div>
+      </Container>
+    </Container>
+  }
+
 
   return (
     <BrowserRouter>
       <Routes>
-        <Route index path='/' element={<Layout mode="serviceTypes" />} />
+        <Route index path='/' element={<Layout mode="serviceTypes" insertTicket={insertTicket} message={message} setMessage={setMessage} />} />
         <Route path='/login' element={
           loggedIn ? <Navigate replace to='/' /> : <LoginRoute message={message} setMessage={setMessage} login={handleLogin} />
         } />
@@ -87,7 +106,7 @@ function Layout(props) {
 
 
   if (mode === "serviceTypes") {
-    outlet = <ServicePage typesServices={typesServices} loading={loading} />
+    outlet = <ServicePage typesServices={typesServices} loading={loading} insertTicket={props.insertTicket} message={props.message} setMessage={props.setMessage} />
   }
 
   return outlet

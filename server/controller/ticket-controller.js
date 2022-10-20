@@ -16,7 +16,6 @@ async function insert(req, res) {
 		const { service_type } = req.body;
 		const date_of_issue = new Date();
 		//TODO: Validation
-
 		const insertedTicket = await db.tickets.add({ service_type, date_of_issue });
 		return res.status(200).json(insertedTicket);
 	} catch (error) {
