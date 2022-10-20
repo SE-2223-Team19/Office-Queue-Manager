@@ -41,12 +41,12 @@ async function run(db, sql, params) {
  * @template T
  * @param {Database} database The database instance
  * @param {string} table The table name
- * @param {{name: string; allow_insert: boolean; is_key: boolean; map: (any) => any}[]} columns The list of columns
+ * @param {{name: string; is_autoincrement: boolean; is_key: boolean; map: (any) => any}[]} columns The list of columns
  * @returns {Entity<T>}
  */
 function Entity(database, table, columns) {
 	const column_defaults = {
-		allow_insert: true,
+		is_autoincrement: false,
 		is_key: false,
 		map: (a) => a,
 	};
@@ -54,6 +54,14 @@ function Entity(database, table, columns) {
 	if (columns.some((c) => c.name === undefined || c.name === null)) {
 		throw new Error("Columns must have a name");
 	}
+
+    if (columns.some(c => c.is_autoincrement) && columns.filter(c => c.is_key).length > 1) {
+        throw new Error("Can't have multiple columns in KEY with AUTOINCREMENT column");
+    }
+
+    if (columns.some(c => c.is_autoincrement && !c.is_key)) {
+        throw new Error("Can't have AUTOINCREMENT columns not in key");
+    }
 
 	this.table = table;
 	this.columns = columns = columns.map((c) => ({ ...column_defaults, ...c }));
@@ -82,9 +90,12 @@ function Entity(database, table, columns) {
      * @returns {Promise<T>}
      */
     this.add = async (entity) => {
-        return run(await database.getConnection(), `INSERT INTO ${table} (${columns.filter(c => c.allow_insert).map(c => `"${c.name}"`).join(', ')}) VALUES (${columns.filter(c => c.allow_insert).map(_ => '?').join(', ')})`, columns.filter(c => c.allow_insert).map(c => entity[c.name]))
+        return run(await database.getConnection(), `INSERT INTO ${table} (${columns.filter(c => !c.is_autoincrement).map(c => `"${c.name}"`).join(', ')}) VALUES (${columns.filter(c => !c.is_autoincrement).map(_ => '?').join(', ')})`, columns.filter(c => !c.is_autoincrement).map(c => entity[c.name]))
         .then(r => {
             if (r.changes > 0) {
+                if (columns.filter(c => c.is_autoincrement && c.is_key).length === 1) {
+                    entity[columns.filter(c => c.is_autoincrement && c.is_key)[0].name] = r.lastID;
+                }
                 return this.get(columns.filter(c => c.is_key).map(c => `"${c.name}" = ?`).join(' AND '), columns.filter(c => c.is_key).map(c => entity[c.name]))
                 .then(r => r.length == 1 ? r[0] : null);
             }

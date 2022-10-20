@@ -111,7 +111,7 @@ function Database() {
 		{
 			name: "id",
 			is_key: true,
-			allow_insert: false,
+			is_autoincrement: true,
 		},
 		{
 			name: "date_of_issue",
@@ -144,7 +144,7 @@ function Database() {
     this.users = new Entity(this, "users", [
         {
             name: "id",
-            allow_insert: false,
+            is_autoincrement: true,
             is_key: true
         },
         {
