@@ -1,25 +1,12 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Container, ListGroup, Toast, Stack } from "react-bootstrap";
 import API from "../API";
+import { TicketContext } from "../context/TicketContext";
 
 function ServiceRow(props) {
-	let name = props.service.name;
+	const name = props.service.name;
 
-	const [message, setMessage] = useState("");
-
-	const insertTicket = async (service_types) => {
-		try {
-			const insertedTicket = await API.insertTicket(service_types);
-			setMessage(
-				"Insert a prenotation for service " +
-					service_types +
-					" and you are number: " +
-					insertedTicket.id
-			);
-		} catch (error) {
-			setMessage({ msg: `Ticket entry failed!`, type: "danger" });
-		}
-	};
+	const { message, setMessage, insertTicket } = useContext(TicketContext);
 
 	return (
 		<>
@@ -100,11 +87,7 @@ function ServiceTypes(props) {
 	return (
 		<>
 			<h4>Service Types</h4>
-			<ServiceList
-				serviceTypes={serviceTypes}
-				loading={loading}
-				insertTicket={props.insertTicket}
-			/>
+			<ServiceList serviceTypes={serviceTypes} loading={loading} />
 		</>
 	);
 }
