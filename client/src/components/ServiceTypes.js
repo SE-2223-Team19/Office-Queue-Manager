@@ -86,7 +86,6 @@ function ServiceTypes(props) {
 
 	return (
 		<>
-			<h4>Service Types</h4>
 			<ServiceList serviceTypes={serviceTypes} loading={loading} />
 		</>
 	);
