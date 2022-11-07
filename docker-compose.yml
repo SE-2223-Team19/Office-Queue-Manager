@@ -1,0 +1,17 @@
+services:
+  client:
+    build:
+      context: "./client/"
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./client:/client"
+      - "./client/node_modules"
+  server:
+    build:
+      context: "./server/"
+    ports:
+      - "3001:3001"
+    volumes:
+      - "./server:/server"
+      - "./server/node_modules"
